@@ -1,6 +1,7 @@
 import networkx as nx
 import matplotlib.pyplot as plt
 import requests
+from threading import Thread
 import re
 from time import sleep
 
@@ -56,8 +57,14 @@ def get_graph(link, depth=3):
     kids = get_hyperlinks(link)
     print("working at depth", depth)
     draw(link, kids)
+    threads = []
     for x in kids.values():
-        get_graph(x, depth - 1)
+        thread = Thread(target = get_graph, args=(x, depth - 1))
+        threads.append(thread)
+        thread.start()
+
+    for x in threads:
+        x.join()
 
 get_graph(link, 4)
 nx.draw(graph, with_labels = True, font_size=5, node_size=100)
