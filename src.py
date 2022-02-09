@@ -1,12 +1,18 @@
-import networkx as nx
+import graphviz
 import matplotlib.pyplot as plt
 import requests
 from threading import Thread
 import re
 from time import sleep
-
+g = graphviz.Digraph('G', filename='process.gv')
 seen = set()
-graph = nx.Graph()
+
+##################################
+#SET THIS PARAMETERS
+link = "https://www.wikipedia.org/"
+breadth = 5
+depth = 3
+##################################
 
 titles = {}
 htmls = {}
@@ -34,7 +40,7 @@ def get_hyperlinks(link):
         return hyperlinks[link]
 
     html_page = get_html(link)
-    links = re.findall(r'(?<=href=")http.+?(?=")', html_page)[:10]
+    links = re.findall(r'(?<=href=")http.+?(?=")', html_page)[:breadth]
     d = {}
     for x in links:
         d[get_title(x)] = x
@@ -47,11 +53,11 @@ def draw(current, kids):
     for x in kids:
         if c_t == x:
             continue
-        graph.add_edge(c_t, x)
+        g.edge(c_t, x)
 
-link = "http://google.com/"
 
-def get_graph(link, depth=3):
+
+def get_graph(link, depth):
     if depth <= 0:
         return
     kids = get_hyperlinks(link)
@@ -66,6 +72,5 @@ def get_graph(link, depth=3):
     for x in threads:
         x.join()
 
-get_graph(link, 4)
-nx.draw(graph, with_labels = True, font_size=5, node_size=100)
-plt.show()
+get_graph(link, depth)
+g.view()
